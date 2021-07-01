@@ -46,6 +46,9 @@ volatile Premenne vstup = {0,0};
 //preddefinované metódy
 void init();
 void uartinit();
+void ADCinit();
+void initPWM();
+
 void ovladanie();
 bool goout();
 void rezimy();
@@ -53,26 +56,24 @@ void had();
 void kalk();
 void blik();
 void ADC();
-void ADCinit();
 void DAC();
 void pong();
 char getHP(int hp);
-void initPWM();
 void putch(unsigned char data);
 
 int rezim = 1;
 volatile int i = 0;
 
-void __interrupt() ISR(void){
+void __interrupt() ISR(void){                       //čítanie hodnôt z UARTu
 
-if(RC1IF & RC1IE){
-      vstup.data[i] = RCREG1;
-      i++;
+    if(RC1IF & RC1IE){
+          vstup.data[i] = RCREG1;
+          i++;
 
-if(RCREG1 == '='){
-      vstup.full = 1;
-      i = 0;
-      return;
+    if(RCREG1 == '='){
+          vstup.full = 1;
+          i = 0;
+          return;
     }
   }
 }
@@ -115,40 +116,40 @@ void init(){
 }
 
 void uartinit(){
-    ANSELC = 0x00; 
-    TRISD = 0x00; 
-    TRISCbits.TRISC6 = 1; 
-    TRISCbits.TRISC7 = 1;
+    ANSELC = 0x00;                              // vypnutie analogoých funkcií na PORTC
+    TRISD = 0x00;                               // PORTD ako výstup
+    TRISCbits.TRISC6 = 1;                       // TX pin ako vstup
+    TRISCbits.TRISC7 = 1;                       // RX pin ako vstup
 
     /*baudrate*/
     SPBRG1 = 51; 
 
-    TXSTA1bits.SYNC = 0; 
-    RCSTA1bits.SPEN = 1;
-    TXSTA1bits.TXEN = 1; 
-    RCSTA1bits.CREN = 1; 
+    TXSTA1bits.SYNC = 0;                        // nastavenie asynchrónneho módu
+    RCSTA1bits.SPEN = 1;                        // zapnutie UART
+    TXSTA1bits.TXEN = 1;                        // zapnutie TX
+    RCSTA1bits.CREN = 1;                        // zapnutie RX
 
-    RC1IE = 1; 
-    PEIE = 1;
-    GIE = 1; 
+    RC1IE = 1;                                  // zapnutie prerušení od RCREG
+    PEIE = 1;                                   // prerušenie od periferií
+    GIE = 1;                                    // globálne prerušenie
 }
 
 void initPWM(){
    
-    TRISDbits.RD5 = 1;     
-    TRISCbits.RC2 = 1;            
-    CCPTMRS0bits.C1TSEL = 0b00;    
-    PR2 = 199;                   
-    CCP1CONbits.P1M = 0b00;         
+    TRISDbits.RD5 = 1;                          // vypnutie pin P1B
+    TRISCbits.RC2 = 1;                          // vypnutie pin P1A
+    CCPTMRS0bits.C1TSEL = 0b00;                 // timer 2
+    PR2 = 199;                                  // f = 10kHz
+    CCP1CONbits.P1M = 0b00;                     
     CCP1CONbits.CCP1M = 0b1100;     
-    CCPR1L = 0;                  
-    TMR2IF = 0;                   
-    TMR2ON = 1; 
-    while(!TMR2IF){};              
-    PSTR1CON |= 0b11;               
+    CCPR1L = 0;                                 // strieda 0%
+    TMR2IF = 0;                                 // nastaví ked pretečie timer
+    TMR2ON = 1;                                 // stačí zapnúť
+    while(!TMR2IF){};                           // čakáme až raz pretecie
+    PSTR1CON |= 0b11;                           // stream na P1B a P1A
     
-    TRISDbits.RD5 = 0;           
-    TRISCbits.RC2 = 0;             
+    TRISDbits.RD5 = 0;                          // zapnu pin P1B
+    TRISCbits.RC2 = 0;                          // zapnu pin P1A
 }
 
 void ADCinit(){
@@ -156,10 +157,10 @@ void ADCinit(){
     ANSELA |= (1 << 5);             
     ANSELE = 0b1;                 
  
-    ADCON2bits.ADFM = 1;         
-    ADCON2bits.ADCS = 0b110;        
-    ADCON2bits.ACQT = 0b110;       
-    ADCON0bits.ADON = 1;        
+    ADCON2bits.ADFM = 1;                        // right justified
+    ADCON2bits.ADCS = 0b110;                    // Fosc/64
+    ADCON2bits.ACQT = 0b110;                    // 16
+    ADCON0bits.ADON = 1;                        // ADC zapnúť
 }
 
 void ovladanie(){                                    //ovládanie menu
