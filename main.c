@@ -64,7 +64,7 @@ void putch(unsigned char data);
 int rezim = 1;
 volatile int i = 0;
 
-void __interrupt() ISR(void){                       //čítanie hodnôt z UARTu
+void __interrupt() ISR(void){                              //čítanie hodnôt z UARTu
 
     if(RC1IF & RC1IE){
           vstup.data[i] = RCREG1;
@@ -87,7 +87,7 @@ int main(void) {
         __delay_ms(50);
     }
     
-    return 0;                           // nikdy se neprovede
+    return 0;                                                 // nikdy sa nestane
 }
 
 void init(){    
