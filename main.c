@@ -18,7 +18,6 @@
 #include <math.h>
 
 
-
 #define _XTAL_FREQ 32E6
 #define SETDUTY(x) CCPR1L = x
 #define PI 3.14159265
@@ -42,10 +41,9 @@ int full;
 
 } Premenne;
 
-
 volatile Premenne vstup = {0,0};
 
-
+//preddefinované metódy
 void init();
 void uartinit();
 void ovladanie();
@@ -92,8 +90,8 @@ int main(void) {
 }
 
 void init(){    
-      LCD_Init();
-     LED1 = 1;LED2 = 1;LED3 = 1;LED4 = 1;LED5 = 1;LED6 = 1;
+    LCD_Init();
+    LED1 = 1;LED2 = 1;LED3 = 1;LED4 = 1;LED5 = 1;LED6 = 1;     //vypnutie lediek
       
     TRISDbits.TRISD2 = 0;
     TRISDbits.TRISD3 = 0;
@@ -136,7 +134,7 @@ void uartinit(){
 }
 
 void initPWM(){
-        //init - PWM
+   
     TRISDbits.RD5 = 1;     
     TRISCbits.RC2 = 1;            
     CCPTMRS0bits.C1TSEL = 0b00;    
@@ -145,7 +143,7 @@ void initPWM(){
     CCP1CONbits.CCP1M = 0b1100;     
     CCPR1L = 0;                  
     TMR2IF = 0;                   
-    TMR2ON = 1;                    
+    TMR2ON = 1; 
     while(!TMR2IF){};              
     PSTR1CON |= 0b11;               
     
@@ -154,6 +152,7 @@ void initPWM(){
 }
 
 void ADCinit(){
+    
     ANSELA |= (1 << 5);             
     ANSELE = 0b1;                 
  
@@ -163,7 +162,7 @@ void ADCinit(){
     ADCON0bits.ADON = 1;        
 }
 
-void ovladanie(){
+void ovladanie(){                                    //ovládanie menu
     rezimy();
     while(1){
       
@@ -211,7 +210,7 @@ void ovladanie(){
 }
 
 
-void rezimy(){
+void rezimy(){                                          //menu                                 
    
     char text[17] = "";
     switch(rezim){
@@ -240,7 +239,7 @@ void rezimy(){
                   
 }
 
-bool goout(){
+bool goout(){                                       //výstup z funkcie
     if(BTN4)
         return true;
     else
@@ -249,6 +248,8 @@ bool goout(){
 }
 
 void had(){
+    //Had – je složen ze dvou diod plazí se tam a zase zpátky.
+
     int index = 1;
     int sign = 1;
     while(1){
@@ -300,6 +301,8 @@ for(int a=0; a <12 ; a++){
 }
 
 void kalk(){
+    //Mód kalkulačka sečtení/odečtení/delení/násovení dvou čísel – stačí čísla typu uint8_t 0 až 99
+
     uartinit();
     printf("\nKalkulacka vie +-*/ \nTreba zadavat a+b=\n");
     
@@ -373,6 +376,8 @@ TXREG1 = data;
 }
 
 void blik(){
+    //PWM-blikání s plynulou změnou jasu (sinus) - jas led je funkcí sinus(2*pi*f) Změna je
+    //viditelná. Jas se mění sinusově od nuly po max hodnotu
     
     initPWM();
   
@@ -404,6 +409,8 @@ void blik(){
 }
 
 void ADC(){
+    //Ovládání bargraph – vyplňuje jeden řádek displeje vhodným znakem vytvářejte sloupcový
+    //graf na druhém řádku displeje
     
     ADCinit();
     
@@ -446,6 +453,19 @@ void ADC(){
 }
 
 void pong(){
+    
+    //Jde o hru pro dva hráče. Hráč 1 ovládá BTN1, hráč 2 ovládá BTN4
+    //Po displeji se bude na 2. řádku pohybovat znak reprezentující míček „o“.
+    //Na koncích 2. řádku budou zobrazeny dva znaky ve formě bloků „█“ (ASCII 219)
+    //reprezentující pálky pro odpálení míčku.
+    //Hráč musí zmáčknout tlačítko v době, kdy se míček nachází před pálkou, aby došlo
+    //k jeho odpálení na druhou stranu.
+    //Pokud zmáčkne tlačítko dříve, tak se nic neděje.
+    //Pokud nestihne zmáčknout tlačítko v požadované pozici, tak hráč ztrácí život.
+    //Každý hráč má tři životy, které jsou zobrazovány na prvním řádku displeje.
+    //Pokud jeden hráč dosáhne na nula životů zobrazí se na 2 vteřiny „GAME OVER“ na
+    //prvním řádku a „Player 1/2 won“ na řádku druhém
+    //Následně se opět přejde do menu
     
     int hp1 = 3;        //zivoty hraca 1
     int hp2 = 3;        //zivoty hraca 2
