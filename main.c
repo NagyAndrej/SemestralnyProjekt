@@ -163,46 +163,46 @@ void ADCinit(){
     ADCON0bits.ADON = 1;                        // ADC zapnúť
 }
 
-void ovladanie(){                                    //ovládanie menu
+void ovladanie(){                               //ovládanie menu
     rezimy();
     while(1){
       
-    if(BTN1){
-        rezim = rezim - 1;
-        
-        if(rezim <= 0){
-            rezim = 6;
+        if(BTN1){
+            rezim = rezim - 1;
+
+            if(rezim <= 0){
+                rezim = 6;
+            }
+            rezimy();
+            __delay_ms(200);
+
+            break;
         }
-        rezimy();
-        __delay_ms(200);
-     
-        break;
-    }
-    else if(BTN2){
-        rezim = rezim + 1;
-        
-        if(rezim >=7){
-            rezim = 1;
+        else if(BTN2){
+            rezim = rezim + 1;
+
+            if(rezim >=7){
+                rezim = 1;
+            }
+            rezimy();
+             __delay_ms(200);
+
+             break;
         }
-        rezimy();
-         __delay_ms(200);
-        
-         break;
-    }
-    else if(BTN3){
-       if(rezim == 1){
-           had();
-       }else if(rezim == 2){
-           kalk();
-       }else if(rezim == 3){
-           blik();
-       }else if(rezim == 4){
-           ADC();
-       }else if(rezim == 5){
-           DAC();
-       }else if(rezim == 6){
-           pong();
-       }
+        else if(BTN3){
+           if(rezim == 1){
+               had();
+           }else if(rezim == 2){
+               kalk();
+           }else if(rezim == 3){
+               blik();
+           }else if(rezim == 4){
+               ADC();
+           }else if(rezim == 5){
+               DAC();
+           }else if(rezim == 6){
+               pong();
+           }
        
         break;
     }
