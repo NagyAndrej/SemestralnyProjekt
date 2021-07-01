@@ -1,9 +1,6 @@
 
 #include <pic18f46k22.h>
 
-
-
-// REV GPIO
 #pragma config FOSC = HSMP    
 #pragma config PLLCFG = ON   
 #pragma config PRICLKEN = ON    
